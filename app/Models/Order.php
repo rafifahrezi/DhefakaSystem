@@ -39,7 +39,11 @@ class Order extends Model
     {
         return $this->hasOne(Address::class);
     }
-
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+    
     public static function generateOrderNumber(): string
     {
         $prefix = 'ORD-' . now()->format('Ymd') . '-';

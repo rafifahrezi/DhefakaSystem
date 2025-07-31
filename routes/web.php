@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderExportController;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\{
     Auth\ForgetPasswordPage,
@@ -58,6 +59,7 @@ Route::middleware(['auth:web'])->group(function () {
         auth()->logout();
         return redirect('/');
     });
+   
 });
 
 // -------------------------
@@ -65,3 +67,5 @@ Route::middleware(['auth:web'])->group(function () {
 // Route::middleware(['auth', 'is_admin'])->group(function () {
 //     Route::get('/admin/dashboard', AdminDashboard::class);
 // });
+Route::get('/orders/export', [OrderExportController::class, 'exportCsv'])
+    ->name('orders.export');

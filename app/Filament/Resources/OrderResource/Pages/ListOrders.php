@@ -5,6 +5,7 @@ namespace App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource;
 use App\Filament\Resources\OrderResource\Widgets\OrderStats;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 
@@ -16,6 +17,11 @@ class ListOrders extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+
+            Action::make('exportCsv')
+                ->label('Export CSV')
+                ->url(route('orders.export')) // Redirect ke route export
+                ->openUrlInNewTab(),          // Optional, buka di tab baru
         ];
     }
 
