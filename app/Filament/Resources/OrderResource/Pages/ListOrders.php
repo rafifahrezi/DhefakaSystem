@@ -17,12 +17,35 @@ class ListOrders extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
-
-            Action::make('exportCsv')
-                ->label('Export CSV')
-                ->url(route('orders.export')) // Redirect ke route export
-                ->openUrlInNewTab(),          // Optional, buka di tab baru
         ];
+    }
+
+    // Custom method untuk check apakah ada filter aktif
+    public function hasActiveFilters(): bool
+    {
+        $filters = $this->tableFilters ?? [];
+
+        foreach ($filters as $filterName => $filterValue) {
+            if (!empty($filterValue)) {
+                // Khusus untuk filter month_year yang complex
+                if ($filterName === 'month_year' && is_array($filterValue)) {
+                    if (!empty($filterValue['month']) || !empty($filterValue['year'])) {
+                        return true;
+                    }
+                } elseif (!empty($filterValue)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Alternative method untuk check specific filter
+    public function hasMonthYearFilter(): bool
+    {
+        $monthYearFilter = $this->tableFilters['month_year'] ?? [];
+        return !empty($monthYearFilter['month']) || !empty($monthYearFilter['year']);
     }
 
     protected function getHeaderWidgets(): array

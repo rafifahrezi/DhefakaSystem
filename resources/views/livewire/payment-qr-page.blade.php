@@ -3,14 +3,14 @@
     @if ($status === 'not_found')
         <p>Pesanan tidak ditemukan.</p>
     @else
-        <p>Menunggu pembayaran...</p>
+        <p class="text-white">Menunggu pembayaran...</p>
     @endif
     <h2 class="text-xl font-bold text-gray-700 dark:text-gray-200 mb-4">Selesaikan Pembayaran</h2>
 
     <p class="mb-4 text-gray-600 dark:text-gray-400">Silakan scan kode QR berikut untuk menyelesaikan pembayaran.</p>
 
     <div class="flex justify-center mb-6">
-        <img src="./img/QR.jpg" alt="QR Code" class="w-64 h-64" />
+        <img src="../img/QR.jpg" alt="QR Code" class="w-64 h-64" />
     </div>
 
     <div class="text-center text-gray-600 dark:text-gray-400 mb-6">
@@ -28,7 +28,7 @@
         <div class="mt-6">
             <p class="text-gray-600 dark:text-gray-400">Sisa Waktu Pembayaran:</p>
             <div class="mt-1 text-2xl font-mono text-red-600 dark:text-red-400 bg-red-50 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm inline-block" id="countdown-timer">
-                30:00
+                10:00
             </div>
         </div>
 
@@ -55,7 +55,7 @@
 
 <script>
 // Simple 30 minute countdown timer
-let timeLeft = 30 * 60; // 30 minutes in seconds
+let timeLeft = 10 * 60; // 30 minutes in seconds
 
 function updateCountdown() {
     const countdownElement = document.getElementById('countdown-timer');

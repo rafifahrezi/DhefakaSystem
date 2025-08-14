@@ -32,7 +32,7 @@
             </div>
             <div>
               <div class="font-semibold">Email</div>
-              <div class="opacity-90">info@securehome.id</div>
+              <div class="opacity-90">dsa.sistemotomatis@gmail.com</div>
             </div>
           </div>
 
@@ -45,7 +45,7 @@
             </div>
             <div>
               <div class="font-semibold">Alamat</div>
-              <div class="opacity-90">Jl. XYZ</div>
+              <div class="opacity-90">Jl. Gg. H. Yahya No.12A 03, RT.3/RW.3, Balekambang, Kec. Kramat jati, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13530</div>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\OrderExport;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Filament\Resources\OrderResource\RelationManagers\AddressRelationManager;
@@ -33,6 +34,8 @@ use Illuminate\Support\Str;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
 use Filament\Tables\Filters\SelectFilter;
+use Maatwebsite\Excel\Facades\Excel;
+use Spatie\SimpleExcel\SimpleExcelWriter;
 
 class OrderResource extends Resource
 {
@@ -90,7 +93,7 @@ class OrderResource extends Resource
                             ->icons([
                                 'new' => 'heroicon-m-sparkles',
                                 'processing' => 'heroicon-m-arrow-path',
-                                'shipped' => 'heroicon-m-truck', 
+                                'shipped' => 'heroicon-m-truck',
                                 'delivery' => 'heroicon-m-check-badge',
                                 'canceled' => 'heroicon-m-x-circle',
                             ]),
@@ -221,7 +224,88 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'new' => 'New',
+                        'processing' => 'Processing',
+                        'shipped' => 'Shipped',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
+                    ]),
+                Tables\Filters\SelectFilter::make('payment_status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'paid' => 'Paid',
+                        'failed' => 'Failed',
+                    ]),
+                Tables\Filters\Filter::make('month_year')
+                    ->form([
+                        Forms\Components\Select::make('month')
+                            ->label('Bulan')
+                            ->options([
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember',
+                            ]),
+                        Forms\Components\Select::make('year')
+                            ->label('Tahun')
+                            ->options(function () {
+                                $currentYear = date('Y');
+                                $years = [];
+                                for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
+                                    $years[$i] = $i;
+                                }
+                                return $years;
+                            })
+                            ->default(date('Y')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['month'],
+                                fn(Builder $query, $month): Builder => $query->whereMonth('created_at', $month),
+                            )
+                            ->when(
+                                $data['year'],
+                                fn(Builder $query, $year): Builder => $query->whereYear('created_at', $year),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['month']) {
+                            $monthNames = [
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember'
+                            ];
+                            $indicators['month'] = 'Bulan: ' . $monthNames[$data['month']];
+                        }
+
+                        if ($data['year']) {
+                            $indicators['year'] = 'Tahun: ' . $data['year'];
+                        }
+
+                        return $indicators;
+                    }),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -233,9 +317,171 @@ class OrderResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+
+                    // Bulk Export Selected
+                    Tables\Actions\BulkAction::make('export_selected')
+                        ->label('Export Selected')
+                        ->icon('heroicon-m-arrow-path')
+                        ->color('success')
+                        ->action(function ($records) {
+                            return self::exportOrders(
+                                Order::whereIn('id', $records->pluck('id')->toArray())->with(['user', 'orderItems']),
+                                'orders-selected-' . date('Y-m-d-H-i-s') . '.csv'
+                            );
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
+            ])
+            ->headerActions([
+                // Export All Orders
+                Tables\Actions\Action::make('export_all')
+                    ->label('Export All Orders')
+                    ->icon('heroicon-m-arrow-path')
+                    ->color('success')
+                    ->action(function () {
+                        return self::exportOrders(
+                            Order::with(['user', 'items']),
+                            'all-orders-' . date('Y-m-d-H-i-s') . '.csv'
+                        );
+                    }),
+
+                // Export by Month
+                Tables\Actions\Action::make('export_by_month')
+                    ->label('Export by Month')
+                    ->icon('heroicon-o-calendar')
+                    ->color('warning')
+                    ->form([
+                        Forms\Components\Select::make('month')
+                            ->label('Bulan')
+                            ->required()
+                            ->options([
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember',
+                            ])
+                            ->default(date('n')),
+                        Forms\Components\Select::make('year')
+                            ->label('Tahun')
+                            ->required()
+                            ->options(function () {
+                                $currentYear = date('Y');
+                                $years = [];
+                                for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
+                                    $years[$i] = $i;
+                                }
+                                return $years;
+                            })
+                            ->default(date('Y')),
+                    ])
+                    ->action(function (array $data) {
+                        $monthNames = [
+                            1 => 'Januari',
+                            2 => 'Februari',
+                            3 => 'Maret',
+                            4 => 'April',
+                            5 => 'Mei',
+                            6 => 'Juni',
+                            7 => 'Juli',
+                            8 => 'Agustus',
+                            9 => 'September',
+                            10 => 'Oktober',
+                            11 => 'November',
+                            12 => 'Desember'
+                        ];
+
+                        $query = Order::with(['user', 'items']) 
+                            ->whereMonth('created_at', $data['month'])
+                            ->whereYear('created_at', $data['year']);
+
+                        $filename = 'orders-' . strtolower($monthNames[$data['month']]) . '-' . $data['year'] . '.csv';
+
+                        return self::exportOrders($query, $filename);
+                    }),
+
+                // Export Filtered Orders
+                Tables\Actions\Action::make('export_filtered')
+                    ->label('Export Filtered')
+                    ->icon('heroicon-o-funnel')
+                    ->color('info')
+                    ->action(function ($livewire) {
+                        $query = $livewire->getFilteredTableQuery()->with(['user', 'items']);
+                        return self::exportOrders($query, 'orders-filtered-' . date('Y-m-d-H-i-s') . '.csv');
+                    }),
             ]);
     }
+
+    // Static method untuk export menggunakan Spatie SimpleExcel
+    protected static function exportOrders($query, $filename)
+    {
+        try {
+            $orders = $query->get();
+
+            $filePath = storage_path('app/temp/' . $filename);
+
+            if (!file_exists(dirname($filePath))) {
+                mkdir(dirname($filePath), 0755, true);
+            }
+
+            $writer = SimpleExcelWriter::create($filePath);
+
+            $writer->addRow([
+                'Order ID',
+                'Customer Name',
+                'Customer Email',
+                'Order Date',
+                'Status',
+                'Payment Status',
+                'Payment Method',
+                'Shipping Method',
+                'Shipping Amount',
+                'Grand Total',
+                'Currency',
+                'Items',
+                'Notes'
+            ]);
+
+            foreach ($orders as $order) {
+                // ✅ Ganti orderItems menjadi items
+                $items = $order->items->map(function ($item) {
+                    // Pastikan juga kolom yang diakses benar
+                    // Cek apakah di OrderItem ada kolom 'name' atau harus 'product.name'
+                    return ($item->product->name ?? $item->name ?? 'Unknown') . ' (Qty: ' . $item->quantity . ')';
+                })->implode(', ');
+
+                $writer->addRow([
+                    $order->id,
+                    $order->user->name ?? 'N/A',
+                    $order->user->email ?? 'N/A',
+                    $order->created_at->format('d/m/Y H:i:s'),
+                    ucfirst($order->status),
+                    ucfirst($order->payment_status),
+                    ucfirst($order->payment_method),
+                    ucfirst($order->shipping_method ?? ''),
+                    'Rp ' . number_format($order->shipping_amount ?? 0, 0, ',', '.'),
+                    'Rp ' . number_format($order->grand_total, 0, ',', '.'),
+                    strtoupper($order->currency),
+                    $items,
+                    $order->notes ?? ''
+                ]);
+            }
+
+            $writer->close();
+
+            return response()->download($filePath)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            // Tambahkan error handling yang proper
+        }
+    }
+
 
     public static function getRelations(): array
     {

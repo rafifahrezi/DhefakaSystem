@@ -65,7 +65,12 @@ class ProductResource extends Resource
                             ->multiple()
                             ->directory('products')
                             ->maxFiles(5)
+                            ->required()
                             ->reorderable()
+                            ->validationMessages([
+                                'required' => 'Gambar produk wajib diupload!',
+                                'image'    => 'File harus berupa gambar (jpg, png, dll).',
+                            ])
                     ])->columnSpan(2),
                 ])->columns(2),
 

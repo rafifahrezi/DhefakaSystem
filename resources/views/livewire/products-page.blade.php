@@ -6,7 +6,7 @@
                     <div class="p-4 mb-5 bg-white border border-gray-200 dark:border-gray-900 dark:bg-gray-900">
                         <h2 class="text-2xl font-bold dark:text-gray-400"> Categories</h2>
                         {{-- {{ json_encode($selected_categories) }} --}}
-                        <div class="w-16 pb-2 mb-6 border-b border-rose-600 dark:border-gray-400"></div>
+                        <div class="w-16 pb-2 mb-6 border-b bo  rder-rose-600 dark:border-gray-400"></div>
                         <ul>
                             @foreach ($categories as $category)
                                 <li class="mb-4" wire:key="{{ $category->id }}">
@@ -28,8 +28,8 @@
                             @foreach ($brands as $brand)
                                 <li class="mb-4" wire:key="{{ $brand->id }}">
                                     <label for="{{ $brand->slug }}" class="flex items-center dark:text-gray-300">
-                                        <input type="checkbox" wire:model.lazy="selected_brands" id="{{ $brand->slug }}"
-                                            value="{{ $brand->id }}" class="w-4 h-4 mr-2">
+                                        <input type="checkbox" wire:model.lazy="selected_brands"
+                                            id="{{ $brand->slug }}" value="{{ $brand->id }}" class="w-4 h-4 mr-2">
                                         <span class="text-lg dark:text-gray-400">{{ $brand->name }}</span>
                                     </label>
                                 </li>
@@ -75,17 +75,54 @@
                     </div> --}}
                 </div>
                 <div class="w-full px-3 lg:w-3/4">
-                    <div class="px-3 mb-4">
+                    <div class="px-3 mb-6">
+                        <!-- Search and Sort Wrapper -->
                         <div
-                            class="items-center justify-between hidden px-3 py-2 bg-gray-100 md:flex dark:bg-gray-900 ">
-                            <div class="flex items-center justify-between">
-                                <select wire:model.lazy="sort"
-                                    class="block w-60 text-base bg-gray-100 cursor-pointer rounded px-3 py-1.5 text-gray-800 dark:text-gray-200 dark:bg-gray-900">
-                                    <option value="latest">Sort by Latest</option>
-                                    <option value="price_asc">Sort by Price: Low to High</option>
-                                    <option value="price_desc">Sort by Price: High to Low</option>
+                            class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-100 dark:bg-gray-900 rounded-lg shadow-sm p-3">
+
+                            <form wire:submit.prevent="searchSubmit"
+                                class="flex gap-2 items-center relative w-full md:w-80" role="search"
+                                aria-label="Pencarian produk">
+                                <label for="search" class="sr-only">Cari Produk</label>
+
+                                <!-- Icon Search -->
+                                <span
+                                    class="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.65 6.65a7.5 7.5 0 016.36 10.06z" />
+                                    </svg>
+                                </span>
+
+                                <!-- Input Search -->
+                                <input id="search" type="search" wire:model.defer="search"
+                                    placeholder="🔍 Cari produk terbaik untukmu..."
+                                    class="block w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg pl-10 pr-4 py-2 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition duration-150 ease-in-out"
+                                    autocomplete="off" aria-label="Pencarian produk" />
+
+                                <!-- Tombol Cari -->
+                                <button type="submit"
+                                    class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg transition">
+                                    Cari
+                                </button>
+                            </form>
+
+
+
+                            <!-- Sorting Dropdown -->
+                            <div class="relative w-full md:w-60">
+                                <label for="sort" class="sr-only">Urutkan Produk</label>
+                                <select id="sort" wire:model="sort"
+                                    class="block w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 
+                       rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 cursor-pointer
+                       focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent
+                       transition duration-150 ease-in-out">
+                                    <option value="latest">Terbaru</option>
+                                    <option value="price_asc">Harga: Rendah ke Tinggi</option>
+                                    <option value="price_desc">Harga: Tinggi ke Rendah</option>
                                 </select>
-                            </div>                            
+                            </div>
                         </div>
                     </div>
                     <div class="flex flex-wrap items-center ">

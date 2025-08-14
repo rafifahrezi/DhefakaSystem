@@ -17,8 +17,7 @@ use Livewire\WithPagination;
 #[Title('Product Page - Defaka')]
 class ProductsPage extends Component
 {
-    use WithPagination;
-    use LivewireAlert;
+    use WithPagination, LivewireAlert;
 
     #[Url()]
     public array $selected_categories = [];
@@ -28,7 +27,7 @@ class ProductsPage extends Component
 
     #[Url(as: 'featured', history: true)]
     public $featured = null;
-    
+
     #[Url(as: 'on_sale', history: true)]
     public $on_sale = null;
 
@@ -37,6 +36,9 @@ class ProductsPage extends Component
 
     #[Url(as: 'sort', history: true)]
     public string $sort = 'latest';
+
+    #[Url(as: 'search', history: true)]
+    public $search = '';
 
     public function mount()
     {
@@ -49,49 +51,51 @@ class ProductsPage extends Component
         $this->resetPage();
     }
 
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         $query = Product::query()->where('is_active', 1);
 
+        // Filter kategori
         $categories = is_array($this->selected_categories) ? array_filter($this->selected_categories, fn($id) => is_numeric($id) && $id > 0) : [];
         if (!empty($categories)) {
             $query->whereIn('category_id', $categories);
-        }   
+        }
 
+        // Filter brand
         $brands = is_array($this->selected_brands) ? array_filter($this->selected_brands, fn($id) => is_numeric($id) && $id > 0) : [];
         if (!empty($brands)) {
             $query->whereIn('brand_id', $brands);
         }
 
-        // // 🟡 Featured
-        // if (filter_var($this->featured, FILTER_VALIDATE_BOOLEAN)) {
-        //     $query->where('is_featured', 1);
-        // }
-
-        // // 🟡 On Sale
-        // if (filter_var($this->on_sale, FILTER_VALIDATE_BOOLEAN)) {
-        //     $query->where('on_sale', 1);
-        // }
-
-        // // 🟡 Price
-        // if (is_numeric($this->price_range) && $this->price_range > 0) {
-        //     $query->whereBetween('price', [0, $this->price_range]);
-        // }
-        if ($this->sort === 'latest') {
-            $query->latest(); 
-        } elseif ($this->sort === 'price_asc') {
-            $query->orderBy('price', 'asc');
-        } elseif ($this->sort === 'price_desc') {
-            $query->orderBy('price', 'desc');
+        // Filter search
+        if (!empty($this->search)) {
+            $query->where('name', 'like', '%' . $this->search . '%');
         }
 
+        // Sorting
+        match ($this->sort) {
+            'latest'     => $query->latest(),
+            'price_asc'  => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            default      => $query->latest(),
+        };
 
         return view('livewire.products-page', [
-            'products' => $query->paginate(6),
-            'brands' => Brand::where('is_active', 1)->get(['id', 'name', 'slug']),
+            'products'   => $query->paginate(6),
+            'brands'     => Brand::where('is_active', 1)->get(['id', 'name', 'slug']),
             'categories' => Category::where('is_active', 1)->get(['id', 'name', 'slug']),
         ]);
     }
+    public function searchSubmit()
+    {
+        $this->resetPage();
+    }
+
 
     #[On('addToCart')]
     public function addToCart($product_id)
@@ -99,7 +103,7 @@ class ProductsPage extends Component
         if (!auth()->check()) {
             return redirect()->route('login');
         }
-        
+
         $total_count = CartManagement::addItemToCartWithQty($product_id);
         $this->dispatch('update-cart-count', total_count: $total_count)->to(Navbar::class);
 
