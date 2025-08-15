@@ -54,7 +54,7 @@
 </div>
 
 <script>
-// Simple 30 minute countdown timer
+
 let timeLeft = 10 * 60; // 30 minutes in seconds
 
 function updateCountdown() {
@@ -76,12 +76,4 @@ function updateCountdown() {
 updateCountdown();
 setInterval(updateCountdown, 1000);
 </script>
-@push('scripts')
-<script>
-    Livewire.hook('message.processed', (message, component) => {
-        if (@this.get('shouldRedirect')) {
-            window.location.href = "{{ route('success') }}";
-        }
-    });
-</script>
-@endpush
+

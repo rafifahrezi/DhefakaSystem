@@ -9,7 +9,7 @@ use App\Models\Testimonial;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Home Page - Defaka')]
+#[Title('Dhefaka Store')]
 class HomePage extends Component
 {
     public function render()
@@ -18,7 +18,6 @@ class HomePage extends Component
         $categories = Category::where('is_active', 1)->get();
         $testimonials = Testimonial::latest()->take(10)->get();
         $pakets = Paket::with('features')->get()->sortBy(function ($paket) {
-            // Order: Standard (1), Premium (2, middle), Deluxe (3)
             $order = ['standard' => 1, 'premium' => 2, 'deluxe' => 3];
             return $order[$paket->slug] ?? 999;
         });

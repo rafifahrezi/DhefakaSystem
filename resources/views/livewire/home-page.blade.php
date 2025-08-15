@@ -1,9 +1,7 @@
 <div class="home-page-wrapper">
-    {{-- Section Hero (Dipanggil sebagai Livewire Component) --}}
     @livewire('frontend.pages.hero')
     @livewire('frontend.pages.superior')
-
-    {{-- plan 2 --}}
+    {{-- Start Service --}}
     <section id="services" class="py-12 md:py-16 lg:py-20 bg-gray-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-12 lg:mb-16">
@@ -129,9 +127,7 @@
         </div>
     </section>
     {{-- End Paket --}}
-
-
-
+    
     {{-- Start Categories --}}
     <div class="bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300 py-20">
         <div class="max-w-3xl mx-auto text-center mb-16 px-4">

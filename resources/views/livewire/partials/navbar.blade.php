@@ -4,7 +4,7 @@
         <div class="relative md:flex md:items-center md:justify-between">
             <div class="flex items-center justify-between">
                 <a class="flex-none text-xl font-semibold dark:text-white dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                    href="/" aria-label="Brand">Dhefaka Store</a>
+                    href="/" aria-label="Brand">Dhefaka System Automatic</a>
                 <div class="md:hidden">
                     <button type="button"
                         class="hs-collapse-toggle flex justify-center items-center w-9 h-9 text-sm font-semibold rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
@@ -34,30 +34,29 @@
                     class="overflow-hidden overflow-y-auto max-h-[75vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-slate-700 dark:[&::-webkit-scrollbar-thumb]:bg-slate-500 ">
                     <div
                         class="flex flex-col gap-x-0 mt-5 divide-y divide-dashed divide-gray-200 md:flex-row md:items-center md:justify-end md:gap-x-7 md:mt-0 md:ps-7 md:divide-y-0 md:divide-solid dark:divide-gray-700">
-
                         <a wire:navigate
-                            class="font-medium {{ request()->is('/') ? 'text-blue-600' : 'text-gray-500' }}  py-3 md:py-6 dark:text-blue-500 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
-                            href="/" aria-current="page">Home</a>
-
+                            class="font-medium {{ request()->is('/') ? 'text-blue-600 font-semibold' : 'text-gray-500 hover:text-gray-700  dark:text-gray-400 dark:hover:text-gray-300' }} focus:outline-none"
+                            href="/" aria-current="page">
+                            Home
+                        </a>
                         <a wire:navigate
-                            class="font-medium {{ request()->is('categories') ? 'text-blue-600' : 'text-gray-500' }} hover:text-gray-400 py-3 md:py-6 dark:text-gray-400 dark:hover:text-gray-500 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                            class="font-medium {{ request()->is('categories') ? 'text-blue-600 font-semibold' : 'text-gray-500 hover:text-gray-700  dark:text-gray-400 dark:hover:text-gray-300' }} focus:outline-none"
                             href="/categories">
                             Categories
                         </a>
-
-                        <a wire:navigate
-                            class="font-medium {{ request()->is('products') ? 'text-blue-600' : 'text-gray-500' }}  hover:text-gray-400 py-3 md:py-6 dark:text-gray-400 dark:hover:text-gray-500 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                        <a 
+                            class="font-medium {{ request()->is('products') ? 'text-blue-600 font-semibold' : 'text-gray-500 hover:text-gray-700  dark:text-gray-400 dark:hover:text-gray-300' }} focus:outline-none"
                             href="/products">
                             Products
                         </a>
                         <a wire:navigate
-                            class="font-medium {{ request()->is('products') ? 'text-blue-600' : 'text-gray-500' }}  hover:text-gray-400 py-3 md:py-6 dark:text-gray-400 dark:hover:text-gray-500 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+                            class="font-medium {{ request()->is('contact') ? 'text-blue-600 font-semibold' : 'text-gray-500 hover:text-gray-700  dark:text-gray-400 dark:hover:text-gray-300' }} focus:outline-none py-3 md:py-6"
                             href="/contact">
                             Contact
                         </a>
 
                         @if (auth('web')->check())
-                            <a wire:navigate
+                            <a
                                 class="font-medium flex items-center {{ request()->is('cart') ? 'text-blue-600' : 'text-gray-500' }} hover:text-gray-400 py-3 md:py-6 dark:text-gray-400 dark:hover:text-gray-500 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
                                 href="/cart">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -69,7 +68,7 @@
                                     class="py-0.5 px-1.5 rounded-full text-xs font-medium bg-blue-50 border border-blue-200 text-blue-600">{{ $total_count }}</span>
                             </a>
                         @endif
-                        
+
                         @guest
                             <div class="pt-3 md:pt-0">
                                 <a href="/login" onclick="window.location.href='/login'; return false;"
